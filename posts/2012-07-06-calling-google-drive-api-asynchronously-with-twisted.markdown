@@ -10,11 +10,14 @@ choice, but the tight coupling is unhelpful in situations where a different HTTP
 library, or an entirely different approach to network programming should be
 used. An example of this is [Twisted](http://twistedmatrix.com/trac/).
 
-Aside: I won't be going on about how awesome Twisted is, but let's just take it for granted that it is so awesome that I could not write this application without it.
+I won't be going on about how awesome Twisted is, but let's just take it for
+granted that it is so awesome that I could not write this particular application
+without it.
 
-Httplib2 is blocking, and that makes it incompatible with being run inside the Twisted reactor. Fortunately we are only the latest person to have this problem, and a solution exists:
-
-[twisted.internet.threads.deferToThread](http://twistedmatrix.com/documents/current/api/twisted.internet.threads.deferToThread.html)
+Httplib2 is blocking, and that makes it incompatible with being run inside the
+Twisted reactor. Fortunately we are only the latest person to have this problem,
+and a solution exists,
+[twisted.internet.threads.deferToThread](http://twistedmatrix.com/documents/current/api/twisted.internet.threads.deferToThread.html).
 
 ~~~ {.python}
 api_call = drive.files().list()

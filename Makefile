@@ -9,8 +9,11 @@ build: site
 	./site rebuild
 
 clean:
-	rm site.hi site.o
+	rm -f site.hi site.o
 	rm -rf _site _cache
+
+mrproper:
+	rm -f site
 
 github: build
 	./tools/ghp-import _site
