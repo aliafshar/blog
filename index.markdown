@@ -9,4 +9,8 @@ title: Toward a secret sky
 > moment. First to let go of life. Finally, to take a step without feet."
 -- Rumi
 
+<div class="text-center">
+<img src="/images/nasreddinhodja.jpg" />
+</div>
+
 No, this is not a hipster poetry blog. It is a blog about programming. You can find a list of posts in the [archives](/archive.html).
