@@ -13,6 +13,6 @@ clean:
 	rm -rf _site _cache
 
 github: build
-	./tools/ghp-import
+	./tools/ghp-import _site
 	git push origin gh-pages
 	git branch -D gh-pages
