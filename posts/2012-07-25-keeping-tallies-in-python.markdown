@@ -1,6 +1,7 @@
 ---
 title: Keeping tallies in Python
 author: Ali
+tags: Python
 ---
 
 Python's collections module has some of the most consistently useful collection

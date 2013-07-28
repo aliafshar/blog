@@ -17,6 +17,11 @@ div#header {
     text-transform: lowercase;
 }
 
+h1 {
+  line-height: 64px;
+  margin: 24px 0;
+}
+
 div#logo a {
     text-decoration: none;
     color: rgb(51, 51, 51);
