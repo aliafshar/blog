@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>My Hakyll Blog - Building a Haskell web app with Snap</title>
+        <link href="http://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+          <div id="header" class="text-center">
+            <div id="logo">
+                <a href="../">toward a secret sky — a weblog about programming, mostly</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+                <a href="../contact.html">Contact</a>
+            </div>
+        </div>
+
+
+
+        <div id="content">
+            <h1 class="text-center">Building a Haskell web app with Snap</h1>
+
+            <div class="info text-center">
+    Posted on November 26, 2012
+    
+        by Ali
+    
+            <!-- Place this tag where you want the +1 button to render. -->
+            <br /><br /><div class="g-plusone" data-annotation="none" data-size="small"></div>
+</div>
+<div class="entry-content">
+  <p>I’m a Haskell newbie, and it’s fun. I thought I’d document my adventures. Starting with my attempt to build a web app. I could have spent months picking a web framework. There are decent comparisons on the web. I picked <a href="http://snapframework.com">Snap</a>, because of the name (and perhaps some advice from a geeky friend of mine). I’ve written web frameworks (in Python) and the intro to Snap caught my eye. All pretty arbitrary reasons, so let’s get started.</p>
+<p>First there is a quickstart guide. Great, who doesn’t love quickstart guides? It tells me how to install the framework, though that redirects me to another page, but I don’t mind. I would have to have Cabal installed, otherwise it wouldn’t work. Instead of just plain:</p>
+<pre><code>cabal install snap</code></pre>
+<p>I do:</p>
+<pre><code>cabal install --user --prefix=$HOME snap</code></pre>
+<p>Which seems the most convenient way to put things in my ~ tree rather than anywhere on the system. Great it works first time with no dependency issues, conflicts, or compile errors. That’s pretty rare, so great start!</p>
+<p>I start to follow the quickstart guide. First create a directory, then call:</p>
+<pre><code>snap init barebones</code></pre>
+<p>This is great too, so we have a utility script to perform basic operations (as any decent web framework should), and by the look of “barebones” it seems that there are multiple possible templates to start from. Another great feature. The guide suggests running</p>
+<pre><code>snap init -h</code></pre>
+<p>To see the list of templates, and here they are:</p>
+<pre><code>snap init [type]
+
+    [type] can be one of:
+    default   - A default project using snaplets and heist
+    barebones - A barebones project with minimal dependencies
+    tutorial  - The literate Haskell tutorial project</code></pre>
+<p>So three starter templates, one of which is a tutorial. So, two starter templates: “barebones” and “default”. I guess we will use default in the future when writing a real app, with Snaplets. I won’t have much cause to write my own templates, I hope, so moving on.</p>
+<p>The guide doesn’t explain much what it created, but my tree looks like this now:</p>
+<pre><code>./log
+./log/access.log
+./snaptest.cabal
+./src
+./src/Main.hs
+./.ghci</code></pre>
+<p>Pretty much nothing there except Main.hs, which looks like this:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+<span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
+
+<span class="kw">import</span>           Control.Applicative
+<span class="kw">import</span>           Snap.Core
+<span class="kw">import</span>           Snap.Util.FileServe
+<span class="kw">import</span>           Snap.Http.Server
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> quickHttpServe site
+
+<span class="ot">site ::</span> <span class="dt">Snap</span> ()
+site <span class="fu">=</span>
+    ifTop (writeBS <span class="st">&quot;hello world&quot;</span>) <span class="fu">&lt;|&gt;</span>
+    route [ (<span class="st">&quot;foo&quot;</span>, writeBS <span class="st">&quot;bar&quot;</span>)
+          , (<span class="st">&quot;echo/:echoparam&quot;</span>, echoHandler)
+          ] <span class="fu">&lt;|&gt;</span>
+    dir <span class="st">&quot;static&quot;</span> (serveDirectory <span class="st">&quot;.&quot;</span>)
+
+<span class="ot">echoHandler ::</span> <span class="dt">Snap</span> ()
+echoHandler <span class="fu">=</span> <span class="kw">do</span>
+    param <span class="ot">&lt;-</span> getParam <span class="st">&quot;echoparam&quot;</span>
+    maybe (writeBS <span class="st">&quot;must specify echo/param in URL&quot;</span>)
+          writeBS param</code></pre>
+<p>It reads nicely, don’t you think?</p>
+<ul>
+<li>Some imports</li>
+<li>A main function that serves the site</li>
+<li>A site function that returns some Snap, Snap looking like a monad. This is the part that I don’t exactly get: &lt;|&gt; anyone?. We are obviously defining routes, and I am guessing there are 3 ways of hitting this site (This is possibly a bit too much information for a quickstart, I might be happier with just the echo handler, but maybe that isn’t possible on its own. Doesn’t matter though):</li>
+<li><code>/</code> – (ifTop, I’m guessing for the root) where we just return “hello world”</li>
+<li><code>/foo</code> – which just returns “bar”</li>
+<li><code>/echo/&lt;something&gt;</code> – which echoes the something back at us</li>
+<li>The echo handler itself, which gets the parameter defined in the route and returns it. Not exactly sure what the maybe line is doing here. I guess it is a failure condition, though I am more used to frameworks where a missing echoparam would not match the route and just 404.</li>
+</ul>
+<p>Because the snap utility created a cabal file for us (how convenient), I can just install the app with:</p>
+<pre><code>cabal install --user --prefix=$HOME</code></pre>
+<p>That’s right, my app is an executable, now installed, which I can just run. That’s pretty awesome, we don’t have stuff like that in Python frameworks. I had called my initial directory snaptest and that is how the executable comes out. Let’s run it:</p>
+<pre><code>$ snaptest -p 8000
+Listening on http://0.0.0.0:8000/</code></pre>
+<p>And here is what we get:</p>
+<pre><code>http://localhost:8000/
+hello world
+
+http://localhost:8000/foo
+bar
+
+http://localhost:8000/echo
+No handler accepted echo
+
+http://localhost:8000/echo/banana
+banana</code></pre>
+<p>Great, as we mostly imagined, except I can’t make the maybe condition in the echo handler happen, but I don’t care much either. After maybe 256 seconds of actual effort and 16 minutes after deciding to write a Haskell web app, I have one.</p>
+<p>This is the best quick start experience I have had for any web application framework in any language, so things bode well for the future.</p>
+</div>
+
+
+        </div>
+        <div id="footer" class="text-center">
+            <div class="g-plusone" data-annotation="none" data-size="small"></div>
+<br /><br />
+          This site is entirely my own opinion, and not the opinion of my
+          <a href="https://google.com">employer</a>. It is generated by
+            <a href="http://jaspervdj.be/hakyll">hakyll</a> which is badassery incarnate.
+          <div>with regards, Ali Afshar © 2013 onwards
+          </div>
+    </body>
+
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</html>
