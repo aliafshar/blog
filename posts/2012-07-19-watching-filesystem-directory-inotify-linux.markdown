@@ -1,6 +1,7 @@
 ---
 title: Watching a file system directory with inotify and Linux
 author: Ali
+tags: twisted, inotify
 ---
 
 > "Inotify is a Linux kernel subsystem that acts to extend filesystems to notice

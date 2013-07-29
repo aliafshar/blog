@@ -19,8 +19,9 @@ div#header {
 
 h1 {
   line-height: 64px;
-  margin: 24px 0;
+  margin: 32px 0;
 }
+
 
 div#logo a {
     text-decoration: none;
@@ -57,8 +58,9 @@ font-size: 75px;
 line-height: 60px; padding-top: 2px; padding-right: 8px; padding-left: 3px;
 }
 
-pre {
-  margin: 30px 0;
+
+pre, .tags {
+  margin: 32px 0;
 }
 
 code {

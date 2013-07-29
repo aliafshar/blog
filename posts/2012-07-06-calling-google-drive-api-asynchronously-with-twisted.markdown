@@ -1,6 +1,7 @@
 ---
 title: Calling the Google Drive API and other Google APIs asynchronously with Twisted
 author: Ali
+tags: google-apis, python, twisted, httplib2
 ---
 
 You may know that the [Google API Python

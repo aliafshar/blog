@@ -1,6 +1,7 @@
 ---
 title: Building a Haskell web app with Snap
 author: Ali
+tags: web, haskell, snap
 ---
 
 I'm a Haskell newbie, and it's fun. I thought I'd document my adventures.
