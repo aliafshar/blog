@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged httplib2</title>
+    <link href="http://jaspervdj.be/tags/httplib2.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/httplib2.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2012-07-06T00:00:00Z</updated>
+    <entry>
+    <title>Calling the Google Drive API and other Google APIs asynchronously with Twisted</title>
+    <link href="http://jaspervdj.be/posts/2012-07-06-calling-google-drive-api-asynchronously-with-twisted.html" />
+    <id>http://jaspervdj.be/posts/2012-07-06-calling-google-drive-api-asynchronously-with-twisted.html</id>
+    <published>2012-07-06T00:00:00Z</published>
+    <updated>2012-07-06T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>You may know that the <a href="https://code.google.com/p/google-api-python-client/">Google API Python Client</a> is built on <a href="https://code.google.com/p/httplib2/">httplib2</a>. This is a reasonable general choice, but the tight coupling is unhelpful in situations where a different HTTP library, or an entirely different approach to network programming should be used. An example of this is <a href="http://twistedmatrix.com/trac/">Twisted</a>.</p>
+<p>I won’t be going on about how awesome Twisted is, but let’s just take it for granted that it is so awesome that I could not write this particular application without it.</p>
+<p>Httplib2 is blocking, and that makes it incompatible with being run inside the Twisted reactor. Fortunately we are only the latest person to have this problem, and a solution exists, <a href="http://twistedmatrix.com/documents/current/api/twisted.internet.threads.deferToThread.html">twisted.internet.threads.deferToThread</a>.</p>
+<pre class="sourceCode python"><code class="sourceCode python">api_call = drive.files().<span class="dt">list</span>()
+
+<span class="kw">def</span> on_list(resp):
+  <span class="kw">for</span> item in resp[<span class="st">&#39;items&#39;</span>]:
+    <span class="kw">print</span> item[<span class="st">&#39;title&#39;</span>]
+
+d = deferToThread(api_call.execute)
+d.addCallback(on_list)</code></pre>
+<p>A blocking call will be made in a thread and will callback on the returned deferred when it is done. I appreciate that no one<sup><a href="#fn1" class="footnoteRef" id="fnref1">1</a></sup> is 100% happy with this solution.</p>
+<blockquote>
+<p>“Argh, threads!”, “Argh, async!”</p>
+</blockquote>
+<p>But it is a testament to the Greatness of Twisted that it has this sort of facility to play well with other, less flexible, systems.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Did I mention? I am 100% happy.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>]]></summary>
+</entry>
+
+</feed>

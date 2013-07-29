@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged inotify</title>
+    <link href="http://jaspervdj.be/tags/inotify.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/inotify.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2012-07-19T00:00:00Z</updated>
+    <entry>
+    <title>Watching a file system directory with inotify and Linux</title>
+    <link href="http://jaspervdj.be/posts/2012-07-19-watching-filesystem-directory-inotify-linux.html" />
+    <id>http://jaspervdj.be/posts/2012-07-19-watching-filesystem-directory-inotify-linux.html</id>
+    <published>2012-07-19T00:00:00Z</published>
+    <updated>2012-07-19T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<blockquote>
+<p>“Inotify is a Linux kernel subsystem that acts to extend filesystems to notice changes to the filesystem, and report those changes to applications.”</p>
+</blockquote>
+<p><a href="http://en.wikipedia.org/wiki/Inotify">[Citation Needed]</a></p>
+<p>You can use this service from Python using <a href="http://twistedmatrix.com/trac/">Twisted</a> to watch a directory and its contents. Twisted is perfect for this as you likely want to be doing a number of other things at the same time, for example, making an HTTP request every time a change is noticed. The code is so monstrously simple, I will just paste it below.</p>
+<pre class="sourceCode python"><code class="sourceCode python"><span class="ch">from</span> twisted.internet <span class="ch">import</span> inotify
+<span class="ch">from</span> twisted.python <span class="ch">import</span> filepath
+
+<span class="kw">class</span> FileSystemWatcher(<span class="dt">object</span>):
+
+  <span class="kw">def</span> <span class="ot">__init__</span>(<span class="ot">self</span>, path_to_watch):
+    <span class="ot">self</span>.path = path_to_watch
+
+  <span class="kw">def</span> Start(<span class="ot">self</span>):
+    notifier = inotify.INotify()
+    notifier.startReading()
+    notifier.watch(filepath.FilePath(<span class="ot">self</span>.path),
+                   callbacks=[<span class="ot">self</span>.OnChange])
+
+  <span class="kw">def</span> OnChange(<span class="ot">self</span>, watch, path, mask):
+    <span class="kw">print</span> path, <span class="st">&#39;changed&#39;</span> <span class="co"># or do something else!</span>
+
+<span class="kw">if</span> <span class="dt">__name__</span> == <span class="st">&#39;__main__&#39;</span>:
+  <span class="ch">from</span> twisted.internet <span class="ch">import</span> reactor
+  fs = FileSystemWatcher(<span class="st">&#39;/home/ali/tmp&#39;</span>)
+  fs.Start()
+  reactor.run()</code></pre>
+<p>Incredibly easy, and another example of how awesome Twisted is.</p>]]></summary>
+</entry>
+
+</feed>

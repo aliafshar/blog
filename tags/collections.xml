@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged collections</title>
+    <link href="http://jaspervdj.be/tags/collections.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/collections.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2012-07-25T00:00:00Z</updated>
+    <entry>
+    <title>Keeping tallies in Python</title>
+    <link href="http://jaspervdj.be/posts/2012-07-25-keeping-tallies-in-python.html" />
+    <id>http://jaspervdj.be/posts/2012-07-25-keeping-tallies-in-python.html</id>
+    <published>2012-07-25T00:00:00Z</published>
+    <updated>2012-07-25T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>Python’s collections module has some of the most consistently useful collection data structures you will need for everyday programming. Here’s one I didn’t know about, <a href="http://docs.python.org/2/library/collections.html#collections.Counter">collections.Counter</a> (Python 2.7 only!). It is designed to keep “tallies” or count instances of something. The example will make it all clear:</p>
+<pre class="sourceCode python"><code class="sourceCode python"><span class="ch">from</span> collections <span class="ch">import</span> Counter
+cars = Counter()
+<span class="co"># I see one go past, it is red</span>
+cars[<span class="st">&#39;red&#39;</span>] += <span class="dv">1</span>
+<span class="co"># And a green one</span>
+cars[<span class="st">&#39;blue&#39;</span>] += <span class="dv">1</span>
+<span class="co"># etc</span></code></pre>
+<p>This is pretty much like a defaultdict with an integer value, but it is convenient and neat, with a useful constructor.</p>
+<p>There’s more. “Are two strings anagrams?”</p>
+<pre class="sourceCode python"><code class="sourceCode python">are_anagrams = <span class="kw">lambda</span> s1, s2: Counter(s1) == Counter(s2)</code></pre>
+<p>Replied the smartass.</p>]]></summary>
+</entry>
+
+</feed>
