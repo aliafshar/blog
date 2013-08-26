@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged go</title>
+    <link href="http://jaspervdj.be/tags/go.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/go.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2013-07-26T00:00:00Z</updated>
+    <entry>
+    <title>Using Go as an HTTP+JSON client</title>
+    <link href="http://jaspervdj.be/posts/2013-07-26-json-http-client-golang.html" />
+    <id>http://jaspervdj.be/posts/2013-07-26-json-http-client-golang.html</id>
+    <published>2013-07-26T00:00:00Z</published>
+    <updated>2013-07-26T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>Making HTTP calls from <a href="http://golang.org">Go</a> is really easy. I rather like the <a href="http://golang.org/pkg/net/http/">HTTP client</a> because it makes easy things easy, and is flexible enough to do more complicated things without pain. Straight from the documentation, making an HTTP request is as simple as knowing the verb and the URL that you want (minus some boilerplate).</p>
+<pre class="sourceCode go"><code class="sourceCode go">resp, err := http.Get(url)</code></pre>
+<p>Adding a header to our request is a bit more complex, but again well documented. We will be adding the <code>Accept</code> header with a value of <code>application/json</code>. We should create the client and request manually, and add the header.</p>
+<pre class="sourceCode go"><code class="sourceCode go">client := &amp;http.Client{}
+req, err := http.NewRequest(<span class="st">&quot;GET&quot;</span>, url, <span class="ot">nil</span>)
+<span class="kw">if</span> err != <span class="ot">nil</span> {
+  log.Fatalln(err)
+}
+req.Header.Add(<span class="st">&quot;Accept&quot;</span>, <span class="st">&quot;application/json&quot;</span>)</code></pre>
+<p>We can then make the request. Defer is an unbelievably cool and pragmatic Go feature which executes a list of things <a href="http://blog.golang.org/defer-panic-and-recover">after a function returns</a>.</p>
+<pre class="sourceCode go"><code class="sourceCode go">resp, err := client.Do(req)
+<span class="kw">if</span> err != <span class="ot">nil</span> {
+  log.Fatalln(err)
+}
+<span class="kw">defer</span> resp.Body.Close()</code></pre>
+<p>We actually want data from a JSON service, so we will need to decode the JSON. Forunately the <code>resp.Body</code> value implements <a href="http://golang.org/pkg/io/#Reader"><code>io.Reader</code></a> so it can be simply read. <code>io.Reader</code> is the common language of reading any stream, and of course the <a href="http://golang.org/pkg/encoding/json/">JSON</a> package supports it.</p>
+<p>All we need to do is to know what we are decoding and create a type to receive that data, which is explained well in <a href="http://blog.golang.org/json-and-go">this article about JSON with Go</a>. In our example case, we are using data from <a href="https://foaas.herokuapp.com/">FOAAS</a>, which looks like this:</p>
+<pre class="sourceCode json"><code class="sourceCode json">{
+  <span class="dt">&quot;message&quot;</span>:<span class="st">&quot;A message&quot;</span>,
+  <span class="dt">&quot;subtitle&quot;</span>:<span class="st">&quot;A subtitle&quot;</span>
+}</code></pre>
+<p>This easily translates into a Go struct type like:</p>
+<pre class="sourceCode go"><code class="sourceCode go"><span class="kw">type</span> Fo <span class="kw">struct</span> {
+  Message <span class="dt">string</span>
+  Subtitle <span class="dt">string</span>
+}</code></pre>
+<p>Once we have this, we can easily decode our response straight into a pointer to our struct. We create the decoder from the reader, an instance of the struct, then call <code>Decode</code>.</p>
+<pre class="sourceCode go"><code class="sourceCode go">decoder := json.NewDecoder(resp.Body)
+v := Fo{}
+err = decoder.Decode(&amp;v)
+<span class="kw">if</span> err != <span class="ot">nil</span> {
+  log.Fatalln(err)
+}</code></pre>
+<p>Finally we print out our struct. This uses the default <code>String()</code> but you can easily attach your own for custom printing.</p>
+<pre><code>2013/08/26 13:37:56 {Ali, Thou clay-brained guts, thou knotty-pated fool, thou
+whoreson obscene greasy tallow-catch! - Hilda}</code></pre>
+<p>That’s it. It might seem a bit verbose compared to other languages, but we have done some interesting things that might have been a bit of a pain elsewhere:</p>
+<ol style="list-style-type: decimal">
+<li>Added a header to an HTTP request</li>
+<li>Decoded JSON into an instance</li>
+<li>Checked every error and responded appropriately</li>
+</ol>
+<p>I think for doing all that, it is pretty concise. Complete code follows:</p>
+<pre class="sourceCode go"><code class="sourceCode go"><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+  <span class="st">&quot;encoding/json&quot;</span>
+  <span class="st">&quot;net/http&quot;</span>
+  <span class="st">&quot;log&quot;</span>
+)
+
+<span class="kw">const</span> url = <span class="st">&quot;https://foaas.herokuapp.com/shakespeare/Ali/Hilda&quot;</span>
+
+<span class="kw">type</span> Fo <span class="kw">struct</span> {
+  Message  <span class="dt">string</span>
+  Subtitle <span class="dt">string</span>
+}
+
+<span class="kw">func</span> main() {
+  client := &amp;http.Client{}
+  req, err := http.NewRequest( <span class="st">&quot;GET&quot;</span>, url , <span class="ot">nil</span>)
+  <span class="kw">if</span> err != <span class="ot">nil</span> {
+    log.Fatalln(err)
+  }
+  req.Header.Add(<span class="st">&quot;Accept&quot;</span>, <span class="st">&quot;application/json&quot;</span>)
+  resp, err := client.Do(req)
+  <span class="kw">if</span> err != <span class="ot">nil</span> {
+    log.Fatalln(err)
+  }
+  <span class="kw">defer</span> resp.Body.Close()
+  decoder := json.NewDecoder(resp.Body)
+  v := Fo{}
+  err = decoder.Decode(&amp;v)
+  <span class="kw">if</span> err != <span class="ot">nil</span> {
+    log.Fatalln(err)
+  }
+  log.Println(v)
+}</code></pre>]]></summary>
+</entry>
+
+</feed>
