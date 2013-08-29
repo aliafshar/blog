@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged non-technical</title>
+    <link href="http://jaspervdj.be/tags/non-technical.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/non-technical.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2013-07-29T00:00:00Z</updated>
+    <entry>
+    <title>The British Scale of Excellence</title>
+    <link href="http://jaspervdj.be/posts/2013-07-29-scale-of-excellence.html" />
+    <id>http://jaspervdj.be/posts/2013-07-29-scale-of-excellence.html</id>
+    <published>2013-07-29T00:00:00Z</published>
+    <updated>2013-07-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>As a Brit in California, I sometimes have trouble expressing myself or being understood. I’ve decided to publish my scale as a reference guide for those who might find it useful.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><code>en_US</code></th>
+<th align="left"><code>en_GB</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Very bad</td>
+<td align="left">Not entirely terrible</td>
+</tr>
+<tr class="even">
+<td align="left">Bad</td>
+<td align="left">Not too bad</td>
+</tr>
+<tr class="odd">
+<td align="left">OK</td>
+<td align="left">Not too bad at all</td>
+</tr>
+<tr class="even">
+<td align="left">Good</td>
+<td align="left">Not bad</td>
+</tr>
+<tr class="odd">
+<td align="left">Very Good</td>
+<td align="left">Not too shabby</td>
+</tr>
+</tbody>
+</table>
+<p>I hope that helps.</p>]]></summary>
+</entry>
+
+</feed>
