@@ -68,6 +68,16 @@ code {
   border: none;
 }
 
+td, th {
+  padding: 12px;
+}
+
+table {
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+  margin: 32px auto;
+}
+
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; background-color: #303030; color: #cccccc; }
