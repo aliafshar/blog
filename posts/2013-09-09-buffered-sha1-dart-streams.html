@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Toward a secret sky - Buffered SHA1 in Dart with a StreamTransformer</title>
+        <link href="http://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+          <div id="header" class="text-center">
+            <div id="logo">
+                <a href="../">toward a secret sky — a weblog about programming, mostly</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+
+
+
+        <div id="content">
+            <h1 class="text-center">Buffered SHA1 in Dart with a StreamTransformer</h1>
+
+            <div class="info text-center">
+  Posted
+    in <a href="../tags/dart.html">dart</a>, <a href="../tags/sha1.html">sha1</a>, <a href="../tags/streams.html">streams</a>
+    on September  9, 2013
+    
+        by Ali
+    
+            <!-- Place this tag where you want the +1 button to render. -->
+            <br /><br /><div class="g-plusone" data-annotation="none" data-size="small"></div>
+</div>
+<div class="entry-content">
+  <p>I’ve been hacking somewhat on a <a href="http://dartlang.org">Dart</a> client for <a href="http://camlistore.org/">Camlistore</a> recently, and as part of that I need to take a SHA1 hash of files. This is easy to do in Dart, as the <a href="http://api.dartlang.org/docs/bleeding_edge/crypto.html">Crypto</a> package takes care of me, and I can produce a simple implementation.</p>
+<pre class="sourceCode java"><code class="sourceCode java">String <span class="fu">sha1</span>(List&lt;<span class="dt">int</span>&gt; bs) {
+  <span class="dt">final</span> crypto.<span class="fu">SHA1</span> sha1 = <span class="kw">new</span> crypto.<span class="fu">SHA1</span>();
+  sha1.<span class="fu">add</span>(bs);
+  <span class="dt">final</span> hexdgst = crypto.<span class="fu">CryptoUtils</span>.<span class="fu">bytesToHex</span>(sha1.<span class="fu">close</span>());
+  <span class="kw">return</span> 'sha1-${hexdgst}';
+}
+
+Future&lt;String&gt; <span class="fu">sha1File</span>(String filename) =&gt;
+  <span class="kw">return</span> <span class="kw">new</span> File(filename).<span class="fu">readAsBytes</span>().<span class="fu">then</span>(sha1);
+
+<span class="fu">sha1File</span>('/home/ali/banana.<span class="fu">png</span>').<span class="fu">then</span>(print);</code></pre>
+<p>This is fine until I read a 2 gigabyte file. At that point, I need to buffer the loading. Dart streams to the rescue. You can read a file as a <code>Stream&lt;List&lt;int&gt;&gt;</code> and using a <code>StreamTransformer</code> can just convert that stream into a <code>Stream&lt;String&gt;</code> which is the SHA1.</p>
+<pre class="sourceCode java"><code class="sourceCode java"><span class="fu">bufferedSha1Transformer</span>() {
+  <span class="dt">final</span> sha1 = <span class="kw">new</span> crypto.<span class="fu">SHA1</span>();
+  <span class="kw">return</span> <span class="kw">new</span> StreamTransformer&lt;List&lt;<span class="dt">int</span>&gt;, String&gt;(
+    handleData: (List&lt;<span class="dt">int</span>&gt; value, EventSink&lt;String&gt; sink) {
+      sha1.<span class="fu">add</span>(value);
+    },
+    handleDone: (EventSink&lt;String&gt; sink) {
+      <span class="dt">final</span> dgst = crypto.<span class="fu">CryptoUtils</span>.<span class="fu">bytesToHex</span>(sha1.<span class="fu">close</span>());
+      sink.<span class="fu">add</span>('sha1-${dgst}');
+    }
+  );
+}
+
+Stream&lt;String&gt; <span class="fu">sha1BufferedFile</span>(String filename) =&gt;
+  <span class="kw">new</span> File(filename).<span class="fu">openRead</span>().<span class="fu">transform</span>(<span class="fu">bufferedSha1Transformer</span>());
+
+<span class="fu">sha1BufferedFile</span>('/home/ali/banana.<span class="fu">png</span>').<span class="fu">listen</span>(print);</code></pre>
+<p>The file is read in chunks of 65536 bytes, and added to the SHA1. When the file is finished the target stream (sink) emits the digest.</p>
+<p>Neat, eh? I’ll admit until today I thought Dart streams were annoying, but now I am converted.</p>
+</div>
+
+
+        </div>
+        <div id="footer" class="text-center">
+          <div class="g-plusone" data-annotation="none" data-size="small"></div>
+          <br />
+          <br />
+          <p>
+          every byte is entirely my own opinion, not of my awesome
+          <a href="https://google.com">employer</a> — It is generated by
+            <a href="http://jaspervdj.be/hakyll">hakyll</a> which is badassery incarnate.
+          </p>
+          <p>
+          with regards, Ali Afshar © 2013 onwards
+          </p>
+          <p>
+          
+          <a name="contact"><a></a>
+              <a href="http://google.com/+AliHAfshar"><img src="../images/google-plus.png"></a>
+              <a href="http://twitter.com/@aliafshar"><img src="../images/twitter.png"></a>
+              <a href="http://github.com/aliafshar"><img src="../images/github.png"></a>
+              <a href="http://stackoverflow.com/users/28380/ali-afshar">
+                <img src="../images/so-icon.png"></a>
+              </p>
+          </div>
+    </body>
+
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-932422-8', 'aliafshar.github.io');
+  ga('send', 'pageview');
+</script>
+</html>

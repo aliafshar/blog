@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>jaspervdj - Posts tagged dart</title>
+    <link href="http://jaspervdj.be/tags/dart.xml" rel="self" />
+    <link href="http://jaspervdj.be" />
+    <id>http://jaspervdj.be/tags/dart.xml</id>
+    <author>
+        <name>Jasper Van der Jeugt</name>
+        <email>jaspervdj@gmail.com</email>
+    </author>
+    <updated>2013-09-09T00:00:00Z</updated>
+    <entry>
+    <title>Buffered SHA1 in Dart with a StreamTransformer</title>
+    <link href="http://jaspervdj.be/posts/2013-09-09-buffered-sha1-dart-streams.html" />
+    <id>http://jaspervdj.be/posts/2013-09-09-buffered-sha1-dart-streams.html</id>
+    <published>2013-09-09T00:00:00Z</published>
+    <updated>2013-09-09T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>I’ve been hacking somewhat on a <a href="http://dartlang.org">Dart</a> client for <a href="http://camlistore.org/">Camlistore</a> recently, and as part of that I need to take a SHA1 hash of files. This is easy to do in Dart, as the <a href="http://api.dartlang.org/docs/bleeding_edge/crypto.html">Crypto</a> package takes care of me, and I can produce a simple implementation.</p>
+<pre class="sourceCode java"><code class="sourceCode java">String <span class="fu">sha1</span>(List&lt;<span class="dt">int</span>&gt; bs) {
+  <span class="dt">final</span> crypto.<span class="fu">SHA1</span> sha1 = <span class="kw">new</span> crypto.<span class="fu">SHA1</span>();
+  sha1.<span class="fu">add</span>(bs);
+  <span class="dt">final</span> hexdgst = crypto.<span class="fu">CryptoUtils</span>.<span class="fu">bytesToHex</span>(sha1.<span class="fu">close</span>());
+  <span class="kw">return</span> &#39;sha1-${hexdgst}&#39;;
+}
+
+Future&lt;String&gt; <span class="fu">sha1File</span>(String filename) =&gt;
+  <span class="kw">return</span> <span class="kw">new</span> File(filename).<span class="fu">readAsBytes</span>().<span class="fu">then</span>(sha1);
+
+<span class="fu">sha1File</span>(&#39;/home/ali/banana.<span class="fu">png</span>&#39;).<span class="fu">then</span>(print);</code></pre>
+<p>This is fine until I read a 2 gigabyte file. At that point, I need to buffer the loading. Dart streams to the rescue. You can read a file as a <code>Stream&lt;List&lt;int&gt;&gt;</code> and using a <code>StreamTransformer</code> can just convert that stream into a <code>Stream&lt;String&gt;</code> which is the SHA1.</p>
+<pre class="sourceCode java"><code class="sourceCode java"><span class="fu">bufferedSha1Transformer</span>() {
+  <span class="dt">final</span> sha1 = <span class="kw">new</span> crypto.<span class="fu">SHA1</span>();
+  <span class="kw">return</span> <span class="kw">new</span> StreamTransformer&lt;List&lt;<span class="dt">int</span>&gt;, String&gt;(
+    handleData: (List&lt;<span class="dt">int</span>&gt; value, EventSink&lt;String&gt; sink) {
+      sha1.<span class="fu">add</span>(value);
+    },
+    handleDone: (EventSink&lt;String&gt; sink) {
+      <span class="dt">final</span> dgst = crypto.<span class="fu">CryptoUtils</span>.<span class="fu">bytesToHex</span>(sha1.<span class="fu">close</span>());
+      sink.<span class="fu">add</span>(&#39;sha1-${dgst}&#39;);
+    }
+  );
+}
+
+Stream&lt;String&gt; <span class="fu">sha1BufferedFile</span>(String filename) =&gt;
+  <span class="kw">new</span> File(filename).<span class="fu">openRead</span>().<span class="fu">transform</span>(<span class="fu">bufferedSha1Transformer</span>());
+
+<span class="fu">sha1BufferedFile</span>(&#39;/home/ali/banana.<span class="fu">png</span>&#39;).<span class="fu">listen</span>(print);</code></pre>
+<p>The file is read in chunks of 65536 bytes, and added to the SHA1. When the file is finished the target stream (sink) emits the digest.</p>
+<p>Neat, eh? I’ll admit until today I thought Dart streams were annoying, but now I am converted.</p>]]></summary>
+</entry>
+
+</feed>
