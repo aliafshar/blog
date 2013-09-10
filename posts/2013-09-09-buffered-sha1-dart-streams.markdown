@@ -18,7 +18,7 @@ String sha1(List<int> bs) {
 }
 
 Future<String> sha1File(String filename) =>
-  return new File(filename).readAsBytes().then(sha1);
+  new File(filename).readAsBytes().then(sha1);
 
 sha1File('/home/ali/banana.png').then(print);
 ~~~
@@ -38,14 +38,15 @@ bufferedSha1Transformer() {
     handleDone: (EventSink<String> sink) {
       final dgst = crypto.CryptoUtils.bytesToHex(sha1.close());
       sink.add('sha1-${dgst}');
+      sink.close();
     }
   );
 }
 
-Stream<String> sha1BufferedFile(String filename) =>
-  new File(filename).openRead().transform(bufferedSha1Transformer());
+Future<String> sha1BufferedFile(String filename) =>
+  new File(filename).openRead().transform(bufferedSha1Transformer()).single;
 
-sha1BufferedFile('/home/ali/banana.png').listen(print);
+sha1BufferedFile('/home/ali/banana.png').then(print);
 ~~~
 
 The file is read in chunks of 65536 bytes, and added to the SHA1. When the file
@@ -53,6 +54,11 @@ is finished the target stream (sink) emits the digest.
 
 Neat, eh? I'll admit until today I thought Dart streams were annoying, but now
 I am converted.
+
+Updates
+--
+* Call `sink.close()`
+* Since the sink only emits one value, it can be converted to a future with `single`.
 
 [Dart]: http://dartlang.org
 [Camlistore]: http://camlistore.org/
